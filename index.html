@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mac & Hash</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <!-- MD5 via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/spark-md5/spark-md5.min.js"></script>
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="header">
+    <div class="header__logo">
+      <img
+        class="header__logo-img"
+        src= /media/logo-pnj.png 
+        alt=""
+      />
+    </div>
+    <div class="header__title">
+      <h2>Mac & Hash</h2>
+      <h3>Aplikasi Hash Checker dan HMAC (Hash-Based Message Authentication Code)</h3>
+      <h3>Kelompok 5</h3>
+      <p>Muhammad Hanif Fawwaz - Fathir Diaz Harvansyah - Indaya Mahayana - Divia Fariza - Abi Khairul Kurniawan</p>
+    </div>
+    <nav class="tab-nav">
+      <button class="tab-btn active" data-tab="hash">Hash File</button>
+      <button class="tab-btn" data-tab="hmac">HMAC</button>
+      <button class="tab-btn" data-tab="avalanche">Avalanche</button>
+      <button class="tab-btn" data-tab="benchmark">Benchmark</button>
+      <button class="tab-btn" data-tab="history">History</button>
+    </nav>
+  </header>
+
+  <main class="main">
+
+    <!-- ===== TAB: HASH FILE ===== -->
+    <section class="tab-content active" id="tab-hash">
+      <div class="section-header">
+        <h1>Hash File / Teks</h1>
+        <p>Hitung dan bandingkan hash menggunakan SHA-1, SHA-256, SHA-512, dan MD5.</p>
+      </div>
+
+      <!-- Input mode toggle -->
+      <div class="toggle-group">
+        <button class="toggle-btn active" id="btn-mode-file" data-mode="file">📁 File</button>
+        <button class="toggle-btn" id="btn-mode-text" data-mode="text">✏️ Teks</button>
+      </div>
+
+      <!-- File drop zone -->
+      <div class="dropzone" id="dropzone">
+        <div class="dropzone__inner">
+          <div class="dropzone__icon">⬆</div>
+          <p class="dropzone__label">Drag &amp; drop file di sini</p>
+          <p class="dropzone__sub">atau klik untuk pilih file</p>
+          <input type="file" id="file-input" hidden />
+        </div>
+        <div class="dropzone__file-info" id="file-info" hidden>
+          <span class="file-name" id="file-name-display"></span>
+          <span class="file-size" id="file-size-display"></span>
+        </div>
+      </div>
+
+      <!-- Text input -->
+      <div id="text-input-wrapper" hidden>
+        <textarea class="text-input" id="text-input" placeholder="Ketik atau paste teks di sini..."></textarea>
+      </div>
+
+      <!-- Algorithm selector -->
+      <div class="algo-selector">
+        <label class="algo-label">Algoritma:</label>
+        <div class="algo-checkboxes">
+          <label class="algo-check"><input type="checkbox" value="MD5" checked /> MD5</label>
+          <label class="algo-check"><input type="checkbox" value="SHA-1" checked /> SHA-1</label>
+          <label class="algo-check"><input type="checkbox" value="SHA-256" checked /> SHA-256</label>
+          <label class="algo-check"><input type="checkbox" value="SHA-512" checked /> SHA-512</label>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="action-row">
+        <button class="btn btn--primary" id="btn-hash">Hitung Hash</button>
+        <button class="btn btn--ghost" id="btn-clear-hash">Reset</button>
+      </div>
+
+      <!-- Progress bar -->
+        <div class="progress-wrap" id="progress-wrap" hidden>
+        <div class="progress-bar" id="progress-bar"></div>
+        <span class="progress-label" id="progress-label">Memproses...</span>
+      </div> 
+
+      <!-- Results -->
+      <div class="results" id="hash-results" hidden>
+        <div class="results__header">
+          <h3>Hasil Hash</h3>
+          <button class="btn btn--sm btn--ghost" id="btn-export">⬇ Export .txt</button>
+        </div>
+        <div class="hash-table" id="hash-table">
+          <!-- filled by JS -->
+        </div>
+
+        <!-- Compare section -->
+        <div class="compare-box">
+          <label class="compare-label">🔍 Bandingkan dengan hash yang diketahui:</label>
+          <div class="compare-input-row">
+            <input type="text" class="compare-input" id="compare-input" placeholder="Paste expected hash di sini..." />
+            <button class="btn btn--primary btn--sm" id="btn-compare">Cek</button>
+          </div>
+          <div class="compare-result" id="compare-result" hidden></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== TAB: HMAC ===== -->
+    <section class="tab-content" id="tab-hmac">
+      <div class="section-header">
+        <h1>HMAC — Hash-based Message Authentication Code</h1>
+        <p>HMAC membuktikan dua properti sekaligus: <strong>integritas</strong> (file tidak berubah) + <strong>autentisitas</strong> (berasal dari pihak yang punya secret key). Hash biasa hanya membuktikan integritas.</p>
+      </div>
+
+      <div class="info-card">
+        <div class="info-card__icon">🔑</div>
+        <div>
+          <strong>Cara Kerja:</strong> HMAC = H(key ⊕ opad ∥ H(key ⊕ ipad ∥ message))<br />
+          Tanpa mengetahui <em>secret key</em>, penyerang tidak bisa memalsukan HMAC meski tahu isi file.
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>File Input</label>
+        <div class="dropzone dropzone--sm" id="hmac-dropzone">
+          <div class="dropzone__inner">
+            <span>📁 Klik atau drop file</span>
+            <input type="file" id="hmac-file-input" hidden />
+          </div>
+          <div class="dropzone__file-info" id="hmac-file-info" hidden>
+            <span id="hmac-file-name"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Secret Key</label>
+        <div class="key-input-row">
+          <input type="password" class="text-input text-input--sm" id="hmac-key" placeholder="Masukkan secret key..." />
+          <button class="btn btn--ghost btn--sm" id="btn-toggle-key">👁</button>
+          <button class="btn btn--ghost btn--sm" id="btn-gen-key">🎲 Generate</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Algoritma</label>
+        <select class="select-input" id="hmac-algo">
+          <option value="SHA-1">HMAC-SHA1</option>
+          <option value="SHA-256" selected>HMAC-SHA256</option>
+          <option value="SHA-512">HMAC-SHA512</option>
+        </select>
+      </div>
+
+      <div class="action-row">
+        <button class="btn btn--primary" id="btn-hmac">Generate HMAC</button>
+        <button class="btn btn--ghost" id="btn-clear-hmac">Reset</button>
+      </div>
+
+      <div class="results" id="hmac-results" hidden>
+        <div class="hash-table" id="hmac-table"></div>
+        <div class="compare-box">
+          <label class="compare-label">🔍 Verifikasi HMAC yang diterima:</label>
+          <div class="compare-input-row">
+            <input type="text" class="compare-input" id="hmac-compare-input" placeholder="Paste HMAC yang diharapkan..." />
+            <button class="btn btn--primary btn--sm" id="btn-hmac-compare">Verifikasi</button>
+          </div>
+          <div class="compare-result" id="hmac-compare-result" hidden></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== TAB: AVALANCHE ===== -->
+    <section class="tab-content" id="tab-avalanche">
+      <div class="section-header">
+        <h1>Avalanche Effect Visualizer</h1>
+        <p>Demonstrasi sifat kriptografi: <strong>perubahan 1 karakter input mengubah ~50% bit output hash</strong>.</p>
+      </div>
+
+      <div class="info-card">
+        <div class="info-card__icon">🏔</div>
+        <div>
+          <strong>Mengapa penting?</strong> Ini membuktikan hash bersifat <em>unpredictable</em> — kecil pun perubahan input tidak bisa diprediksi outputnya, sehingga tidak bisa di-reverse atau dimanipulasi secara parsial.
+        </div>
+      </div>
+
+      <div class="avalanche-inputs">
+        <div class="form-group">
+          <label>Teks Original</label>
+          <textarea class="text-input" id="av-text-a" placeholder="Ketik teks original...">Kriptografi adalah ilmu penting.</textarea>
+        </div>
+        <div class="form-group">
+          <label>Teks Dimodifikasi <span class="hint">(ubah 1 karakter saja)</span></label>
+          <textarea class="text-input" id="av-text-b" placeholder="Ketik teks yang sedikit berbeda...">kriptografi adalah ilmu penting.</textarea>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Algoritma</label>
+        <select class="select-input" id="av-algo">
+          <option value="SHA-1">SHA-1</option>
+          <option value="SHA-256" selected>SHA-256</option>
+          <option value="SHA-512">SHA-512</option>
+        </select>
+      </div>
+
+      <div class="action-row">
+        <button class="btn btn--primary" id="btn-avalanche">Analisis Avalanche</button>
+      </div>
+
+      <div class="results" id="avalanche-results" hidden>
+        <div class="avalanche-grid" id="avalanche-grid">
+          <!-- filled by JS -->
+        </div>
+        <div class="bit-visual-wrap">
+          <h4>Visualisasi Perubahan Bit</h4>
+          <p class="hint">Merah = bit berubah, Abu-abu = bit sama</p>
+          <div class="bit-visual" id="bit-visual"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== TAB: BENCHMARK ===== -->
+    <section class="tab-content" id="tab-benchmark">
+      <div class="section-header">
+        <h1>Hash Benchmark &amp; Perbandingan Performa</h1>
+        <p>Bandingkan kecepatan komputasi, panjang output, dan tingkat keamanan setiap algoritma pada file yang sama.</p>
+      </div>
+
+      <div class="form-group">
+        <label>File untuk Benchmark</label>
+        <div class="dropzone dropzone--sm" id="bench-dropzone">
+          <div class="dropzone__inner">
+            <span>📁 Klik atau drop file</span>
+            <input type="file" id="bench-file-input" hidden />
+          </div>
+          <div class="dropzone__file-info" id="bench-file-info" hidden>
+            <span id="bench-file-name"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Jumlah Iterasi (untuk rata-rata)</label>
+        <select class="select-input" id="bench-iter">
+          <option value="1">1x (cepat)</option>
+          <option value="3" selected>3x (akurat)</option>
+          <option value="5">5x (presisi)</option>
+        </select>
+      </div>
+
+      <div class="action-row">
+        <button class="btn btn--primary" id="btn-benchmark">Jalankan Benchmark</button>
+      </div>
+
+      <div class="results" id="bench-results" hidden>
+        <div class="bench-table-wrap" id="bench-table-wrap">
+          <!-- filled by JS -->
+        </div>
+        <div class="bench-chart-wrap">
+          <h4>Perbandingan Waktu (ms)</h4>
+          <div class="bar-chart" id="bar-chart"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== TAB: HISTORY ===== -->
+    <section class="tab-content" id="tab-history">
+      <div class="section-header">
+        <h1>Riwayat Hash</h1>
+        <p>Log semua hash yang pernah dihitung dalam sesi ini, tersimpan di localStorage.</p>
+      </div>
+      <div class="action-row">
+        <button class="btn btn--ghost btn--sm" id="btn-clear-history">🗑 Hapus Semua</button>
+        <button class="btn btn--ghost btn--sm" id="btn-export-history">⬇ Export History</button>
+      </div>
+      <div class="history-list" id="history-list">
+        <div class="empty-state">Belum ada riwayat. Hash sebuah file dulu!</div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <p>HashVerify — UAS Kriptografi · Semua proses berjalan di browser, file tidak dikirim ke server.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
